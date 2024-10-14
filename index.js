@@ -5,8 +5,10 @@ const authRoutes = require('./routes/userLoginRoutes');
 const mailroutes = require('./routes/mailSendingRoutes');
 const imageUploadRoutes = require('./routes/fileUploadRoutes')
 const authenticateToken = require('./middleware/auth');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 
 require('dotenv').config(); 
 
