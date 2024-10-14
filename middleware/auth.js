@@ -1,22 +1,38 @@
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = '1234567';  
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = "123456";
 
-// Middleware to verify JWT
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+exports.auth = (req, res, next) => {
+    try {
+        // Get the token from the Authorization header
+        const token = req.headers.authorization?.split(" ")[1]; // Split to get the token
 
-  if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
-  }
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "Token missing"
+            });
+        }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: 'Invalid or expired token' });
+        // Verify the token
+        try {
+            const decode = jwt.verify(token, JWT_SECRET);
+
+            console.log(decode);
+
+            req.user = decode; // Attach user info to the request object
+        } catch (e) {
+            return res.status(401).json({
+                success: false,
+                message: "Token is invalid"
+            });
+        }
+
+        next(); // Proceed to the next middleware or route handler
+    } catch (err) {
+        console.log(err);
+        return res.status(401).json({
+            success: false,
+            message: "Something went wrong while verifying token"
+        });
     }
-    req.user = user;  // Attach the decoded user information to the request object
-    next();
-  });
 };
-
-module.exports = authenticateToken;

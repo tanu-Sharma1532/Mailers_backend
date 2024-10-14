@@ -1,44 +1,38 @@
 const multer = require('multer');
 const path = require('path');
 
+// Configure multer for file storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads'); 
+    cb(null, 'public/images'); // Set the directory for uploaded files
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname)); // Unique filename
+    cb(null, uniqueSuffix + path.extname(file.originalname)); // Append the file extension
   }
 });
 
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png|gif/; // Acceptable file types
-    const mimetype = filetypes.test(file.mimetype);
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+// Initialize multer
+const upload = multer({ storage: storage });
 
-    if (mimetype && extname) {
-      return cb(null, true);
-    }
-    cb('Error: File upload only supports the following filetypes - ' + filetypes);
-  }
-}).single('image'); // Expecting single file input with the field name 'image'
-
-// Upload controller function
+// Define the upload function
 const uploadImage = (req, res) => {
-  upload(req, res, (err) => {
-    if (err) {
-      return res.status(400).json({ message: err });
-    }
-    if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-    return res.status(200).json({
-      message: 'Image uploaded successfully',
-      file: req.file
+  try {
+    // Generate the image URL
+    const imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+
+    // Respond with the image URL
+    res.status(200).json({
+      success: true,
+      imageUrl: imageUrl
     });
-  });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Error uploading image',
+      error: error.message
+    });
+  }
 };
 
-module.exports = { uploadImage };
+module.exports = { upload, uploadImage };
