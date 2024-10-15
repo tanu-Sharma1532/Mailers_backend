@@ -1,7 +1,7 @@
 const mailSender = require('../utils/mailSender'); // Adjust the path as necessary
 
 exports.sendEmailToMultipleRecipients = async (req, res) => {
-    const { emails, subject, message } = req.body;
+    const { emails, subject, message, senderName } = req.body;
 
     // Validate input
     if (!emails || !Array.isArray(emails) || emails.length === 0) {
@@ -12,7 +12,8 @@ exports.sendEmailToMultipleRecipients = async (req, res) => {
     }
 
     try {
-        const emailPromises = emails.map(email => mailSender(email, subject, message));
+        // Pass the senderName to the mailSender function
+        const emailPromises = emails.map(email => mailSender(email, subject, message, senderName));
         
         // Wait for all email promises to resolve
         await Promise.all(emailPromises);

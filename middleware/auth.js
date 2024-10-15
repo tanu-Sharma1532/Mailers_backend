@@ -1,38 +1,38 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const JWT_SECRET = "123456";
 
 exports.auth = (req, res, next) => {
     try {
-        // Get the token from the Authorization header
-        const token = req.headers.authorization?.split(" ")[1]; // Split to get the token
+        const token = req?.cookie?.token || req.header("Authorization").replace("Bearer ", "");
 
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: "Token missing"
-            });
+                message: "token missing"
+            })
         }
 
-        // Verify the token
+        // verify the token 
         try {
             const decode = jwt.verify(token, JWT_SECRET);
-
-            console.log(decode);
-
-            req.user = decode; // Attach user info to the request object
-        } catch (e) {
+            req.admin = decode.role;
+            req.email = decode.email;
+            req.id = decode.id;
+        }
+        catch (error) {
             return res.status(401).json({
                 success: false,
-                message: "Token is invalid"
-            });
+                message: "token is invalid"
+            })
         }
 
-        next(); // Proceed to the next middleware or route handler
-    } catch (err) {
-        console.log(err);
+        next();
+    }
+    catch (err) {
+        console.log(err)
         return res.status(401).json({
             success: false,
             message: "Something went wrong while verifying token"
-        });
+        })
     }
-};
+}

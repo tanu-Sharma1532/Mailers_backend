@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-const mailSender = async (to, subject, message) => {
+const mailSender = async (to, subject, message, senderName = 'CartVit Support') => {
     try {
         const transporter = nodemailer.createTransport({
             host: 'smtp-relay.brevo.com',
@@ -14,7 +14,7 @@ const mailSender = async (to, subject, message) => {
         });
 
         const mailOptions = {
-            from: 'support@cartvit.com',
+            from: `${senderName} <support@cartvit.com>`, // Include dynamic sender name
             to,
             subject,
             html: message
@@ -22,7 +22,7 @@ const mailSender = async (to, subject, message) => {
 
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent successfully:', info);
-        return info; 
+        return info;
     } catch (error) {
         console.error('Error sending email:', error.message);
     }

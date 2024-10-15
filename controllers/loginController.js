@@ -120,3 +120,24 @@ exports.login = async (req,res) => {
         })
     }
 }
+
+// Change Password
+exports.changePassword = async (req, res) => {
+    try {
+        const { newPassword, oldPassword } = req.body;
+        const user = await User.findOne({ email: req.email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid User' });
+        }
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ success: false, message: 'Old password is incorrect' });
+        }
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+        res.status(200).json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error in changing password' });
+    }
+};
