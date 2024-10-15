@@ -125,19 +125,35 @@ exports.login = async (req,res) => {
 exports.changePassword = async (req, res) => {
     try {
         const { newPassword, oldPassword } = req.body;
+
+        // Check if both passwords are provided
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Both old and new passwords are required' });
+        }
+
+        // Find the user by email from the token payload
         const user = await User.findOne({ email: req.email });
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Invalid User' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
+
+        // Log the user's email and other useful debug information
+        console.log("Changing password for user:", req.email);
+
+        // Compare old password with the hashed password
         const isMatch = await bcrypt.compare(oldPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: 'Old password is incorrect' });
         }
+
+        // Hash the new password and update the user document
         user.password = await bcrypt.hash(newPassword, 10);
         await user.save();
+
         res.status(200).json({ success: true, message: 'Password changed successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Error in changing password' });
+        // Log the error for debugging purposes
+        console.error('Error in changePassword:', error);
+        res.status(500).json({ success: false, message: 'Error in changing password', error: error.message });
     }
 };
