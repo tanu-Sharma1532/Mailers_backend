@@ -8,13 +8,13 @@ const mailSender = async (to, subject, message, senderName = 'CartVit Support') 
             port: 587,
             secure: false,
             auth: {
-                user: '75836f001@smtp-brevo.com',
-                pass: 'DOFJYgBq965IRwsn'
+                user: '5311f7001@smtp-brevo.com',
+                pass: 'qQ7G95FYbyz6OHUZ'
             }
         });
 
         const mailOptions = {
-            from: `${senderName} <support@cartvit.com>`, // Include dynamic sender name
+            from: `${senderName} <support@themailpanel.com>`, // Include dynamic sender name
             to,
             subject,
             html: message
